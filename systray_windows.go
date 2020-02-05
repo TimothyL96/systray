@@ -6,8 +6,8 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io/ioutil"
-	"path/filepath"
 	"os"
+	"path/filepath"
 	"sync/atomic"
 
 	"github.com/lxn/walk"
@@ -23,6 +23,8 @@ var (
 	nextActionId int32
 
 	okayToClose int32
+
+	defaultMenu *MenuItem
 )
 
 func nativeLoop(title string, width int, height int) {
@@ -62,6 +64,20 @@ func nativeLoop(title string, width int, height int) {
 			fail("Unable to set height", err)
 		}
 	}
+
+	// Set left click to the default function
+	notifyIcon.MouseUp().Attach(func(x, y int, button walk.MouseButton) {
+		if button == walk.LeftButton {
+			if defaultMenu != nil {
+				select {
+				case defaultMenu.ClickedCh <- struct{}{}:
+				// in case no one waiting for the channel
+				default:
+				}
+			}
+		}
+	})
+
 	systrayReady()
 	mainWindow.Run()
 }
@@ -151,6 +167,13 @@ func addOrUpdateMenuItem(item *MenuItem) {
 		if err := notifyIcon.ContextMenu().Actions().Add(action); err != nil {
 			fail("Unable to add menu item to systray", err)
 		}
+
+		if item.isDefault {
+			_ = action.SetDefault(true)
+
+			defaultMenu = item
+		}
+
 		actions[item.id] = action
 		atomic.AddInt32(&nextActionId, 1)
 	}

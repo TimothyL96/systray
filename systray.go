@@ -36,6 +36,8 @@ type MenuItem struct {
 	disabled bool
 	// checked menu item has a tick before the title
 	checked bool
+	// flag for the default menu
+	isDefault bool
 }
 
 var (
@@ -96,9 +98,11 @@ func Quit() {
 // that notifies whenever that menu item is clicked.
 //
 // It can be safely invoked from different goroutines.
-func AddMenuItem(title string, tooltip string) *MenuItem {
+//
+// Do not set as default for menu item that will quit the application
+func AddMenuItem(title string, tooltip string, isDefault bool) *MenuItem {
 	id := atomic.AddInt32(&currentID, 1)
-	item := &MenuItem{nil, id, title, tooltip, false, false}
+	item := &MenuItem{nil, id, title, tooltip, false, false, isDefault}
 	item.ClickedCh = make(chan struct{})
 	item.update()
 	return item
