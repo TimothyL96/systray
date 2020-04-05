@@ -121,5 +121,6 @@ Consult the [Official Apple Documentation here](https://developer.apple.com/libr
 
 ## Credits
 
+- https://github.com/getlantern/systray
 - https://github.com/xilp/systray
 - https://github.com/cratonica/trayhost
